@@ -1,20 +1,24 @@
 """
 Responsibility:
-Combines analytics outputs to generate actionable recommendations.
+Generates actionable recommendations based on rule-derived signals.
 """
 
 from typing import Dict, List
 
+from analytics.statistics import category_share
+from config.settings import UNDERREPRESENTED_CATEGORY_SHARE, DOMINANT_CATEGORY_SHARE
+from config.constants import ALL_CATEGORIES
 
-def recommend_from_daily_activity(category_totals: Dict[str, int]) -> List[str]:
+
+# -----------------------------
+# Daily recommendations
+# -----------------------------
+
+def recommend_from_daily_activity(
+    category_totals: Dict[str, int],
+) -> List[str]:
     """
-    Generate actionable recommendations based on daily activity distribution.
-
-    Args:
-        category_totals: Mapping of category to total minutes.
-
-    Returns:
-        A list of recommendation strings.
+    Generate actionable recommendations based on daily activity patterns.
     """
     recommendations: List[str] = []
 
@@ -22,82 +26,83 @@ def recommend_from_daily_activity(category_totals: Dict[str, int]) -> List[str]:
         return recommendations
 
     total_minutes = sum(category_totals.values())
-    avg_minutes = total_minutes / len(category_totals)
+    if total_minutes == 0:
+        return recommendations
 
-    # Identify under-invested categories
-    for category, minutes in category_totals.items():
-        if minutes < 0.5 * avg_minutes:
+    shares = category_share(category_totals)
+
+    # Underrepresented categories → encourage action
+    for category in ALL_CATEGORIES:
+        share = shares.get(category, 0.0)
+        if 0 < share < UNDERREPRESENTED_CATEGORY_SHARE:
             recommendations.append(
-                f"You spent relatively little time on {category}. "
-                f"Consider allocating a focused block for it tomorrow."
+                f"You spent very little time on {category}. "
+                f"Consider scheduling a short, focused session for it tomorrow."
             )
 
-    # Identify dominant category
-    top_category = max(category_totals, key=category_totals.get)
-    top_share = category_totals[top_category] / total_minutes
+    # Dominant category → suggest balance
+    for category, share in shares.items():
+        if share >= DOMINANT_CATEGORY_SHARE:
+            recommendations.append(
+                f"{category} took up most of your day. "
+                f"Balancing it with lighter or restorative activities may help sustainability."
+            )
 
-    if top_share >= 0.6:
-        recommendations.append(
-            f"{top_category} dominated your day. "
-            f"If this continues, consider balancing it with lighter activities."
-        )
-
-    # If everything is balanced
     if not recommendations:
         recommendations.append(
-            "Your time distribution today was fairly balanced. "
-            "Maintaining this balance can help sustain productivity."
+            "Your activity distribution today was well balanced. "
+            "Maintaining this balance can support long-term consistency."
         )
 
     return recommendations
+
+
+# -----------------------------
+# Weekly recommendations
+# -----------------------------
+
 def recommend_from_weekly_trend(
     current_total: int,
     previous_total: int,
-) -> list[str]:
+) -> List[str]:
     """
-    Generate recommendations based on weekly activity trends.
+    Generate recommendations based on week-over-week activity trends.
     """
-    recommendations: list[str] = []
+    recommendations: List[str] = []
 
     if previous_total == 0:
         return recommendations
 
-    diff = current_total - previous_total
-    percent_change = (diff / previous_total) * 100
+    percent_change = ((current_total - previous_total) / previous_total) * 100
 
-    # Significant decrease
     if percent_change <= -10:
         recommendations.append(
-            "Your overall activity dropped noticeably compared to last week. "
-            "If this was unintentional, consider planning lighter but consistent activity blocks."
+            "Your overall activity dropped significantly compared to last week. "
+            "If unintentional, consider planning smaller but consistent activity blocks."
         )
 
-    # Moderate decrease
     elif -10 < percent_change <= -5:
         recommendations.append(
-            "Your activity was slightly lower than last week. "
-            "A small adjustment in routine could help regain momentum."
+            "Your activity decreased slightly from last week. "
+            "A minor routine adjustment could help restore momentum."
         )
 
-    # Significant increase
     elif percent_change >= 10:
         recommendations.append(
-            "Your activity increased significantly this week. "
-            "Make sure the pace feels sustainable and allows for recovery."
+            "Your activity increased substantially this week. "
+            "Ensure the pace feels sustainable and includes adequate recovery."
         )
 
-    # Moderate increase
     elif 5 <= percent_change < 10:
         recommendations.append(
             "You were slightly more active than last week. "
-            "If this felt good, maintaining this level could be beneficial."
+            "If this felt manageable, maintaining this level could be beneficial."
         )
 
-    # Stable
     else:
         recommendations.append(
-            "Your weekly activity level has remained stable. "
-            "Consistency like this is often a strong foundation for long-term progress."
+            "Your weekly activity level remained stable. "
+            "Consistency like this often supports long-term progress."
         )
 
     return recommendations

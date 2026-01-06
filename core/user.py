@@ -32,6 +32,19 @@ class User:
 
         self._day_logs[activity_date].add_activity(activity)
 
+    def add_activity_log(self, day_log: DayLog) -> None:
+        if not isinstance(day_log, DayLog):
+            raise TypeError("Only DayLog instances can be added.")
+
+        log_date = day_log.get_date()
+
+        if log_date in self._day_logs:
+            raise ValueError(
+                f"DayLog for date {log_date} already exists for this user."
+            )
+
+        self._day_logs[log_date] = day_log
+
     def get_day_log(self, log_date: date) -> Optional[DayLog]:
         if not isinstance(log_date, date):
             raise TypeError("log_date must be a date instance.")
