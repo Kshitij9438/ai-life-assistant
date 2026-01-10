@@ -243,4 +243,3 @@ MIT
 
 ---
 
-This README now tells the **truth** about your system — and that’s its greatest strength.
