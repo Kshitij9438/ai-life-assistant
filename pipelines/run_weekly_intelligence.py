@@ -13,7 +13,8 @@ from ml.evaluate_weekly_model import evaluate_weekly_baseline
 from ml.metrics import mean_absolute_error
 
 from insights.explainations import explain_weekly_prediction
-
+from insights.risk import classify_weekly_risk
+from insights.risk import detect_risk_transition
 
 def run_weekly_intelligence(user_id: str) -> dict:
     """
@@ -82,6 +83,7 @@ def run_weekly_intelligence(user_id: str) -> dict:
     prediction=prediction,
     enforce_conservation=False,  # ✅ CORRECT
 )
+    risk = classify_weekly_risk(features)
 
 
     # --------------------
@@ -123,5 +125,8 @@ def run_weekly_intelligence(user_id: str) -> dict:
             "explainability": "additive",
             "baseline_type": "previous_week",
             "version": "v1.0",
+        },
+        "risk" : {**risk,
+                   "confidence": explanation["confidence_hint"],
         },
     }
