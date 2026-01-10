@@ -1,111 +1,183 @@
 # AI Life Assistant
 
-An end-to-end, modular AI system for analyzing daily activities, generating insights and recommendations, and predicting future behavior using interpretable machine learning.
+A **baseline-aware, explainable behavioral intelligence system** for detecting and forecasting the *structural sustainability* of human activity patterns.
 
-This project is designed as a **production-style analytics + ML pipeline**, not a notebook experiment.
-
----
-
-## 🚀 What This Project Does
-
-The AI Life Assistant:
-
-- Logs and aggregates daily activity data
-- Generates human-readable **insights** and **recommendations**
-- Learns behavioral patterns using **interpretable linear regression**
-- Predicts **tomorrow’s total activity time**
-- Runs entirely via a **clean CLI pipeline**
+This project is **not** a productivity tool, habit tracker, or motivational system.
+It is a **decision-support intelligence engine** designed to reason cautiously about behavior over time.
 
 ---
 
-## 🧠 System Overview
+## What This System Does (Precisely)
 
-```
+At its core, the AI Life Assistant answers one question:
 
-Data → Analytics → Insights → Recommendations → ML Prediction
+> **“Given recent behavior, is the current activity trajectory stable, fragile, or at risk — and why?”**
 
-```
+To do this, the system:
 
-### Core capabilities:
-- **Analytics**: daily & weekly aggregations, trends
-- **Insights**: natural-language summaries of behavior
-- **Recommendations**: rule-based behavioral suggestions
-- **ML**: causal, time-aware regression with lag features
-- **CLI**: daily and weekly reports
+* Aggregates daily activity logs into structured weekly signals
+* Evaluates behavior **relative to explicit baselines**
+* Produces **short-horizon forecasts only** (weekly)
+* Explains predictions using **fully numeric, additive explanations**
+* Classifies **structural risk states** deterministically
+* Explicitly **refuses to speak** when signal quality is insufficient
+
+Silence is considered a **correct and intentional output**.
 
 ---
 
-## 📁 Project Structure
+## What This System Explicitly Does *Not* Do
 
+This project does **not**:
+
+* optimize productivity
+* prescribe schedules or actions
+* motivate users
+* infer intent, discipline, or effort
+* predict burnout, success, or well-being
+* produce long-horizon forecasts
+* perform daily-level prediction
+
+These exclusions are **deliberate design choices**, not missing features.
+
+---
+
+## Core Capabilities (v1)
+
+### 🧠 Weekly Behavioral Intelligence
+
+* Computes weekly activity totals and structure
+* Forecasts **next week only**
+* Always compares predictions against a naive baseline
+* Downgrades or suppresses ML output when it adds no value
+
+### 📉 Baseline-Aware Evaluation
+
+* Baseline MAE is always computed
+* Model MAE is always computed (when ML is used)
+* The system explicitly reports whether ML beats the baseline
+* If it does not, ML is treated as **non-authoritative**
+
+### 🧩 Explainable Predictions
+
+Every prediction includes:
+
+* numeric feature contributions
+* top positive and negative drivers
+* explicit deltas vs baseline and previous week
+* confidence hints tied to structural reliability
+
+No black-box explanations.
+No behavioral judgments.
+
+### ⚠️ Structural Risk Classification
+
+Weekly behavior is classified into deterministic risk states:
+
+* **R0** — Stable trajectory
+* **R1** — Load concentration risk
+* **R2** — Volatility risk
+* **R3** — Fragile trajectory
+* **R4** — Insufficient signal (refusal)
+
+Risk reflects **trajectory sustainability**, not outcomes or psychology.
+
+### 🛑 Refusal Semantics
+
+If fewer than two full weeks of data exist — or signal quality is poor — the system returns:
+
+```json
+{
+  "state": "insufficient_data"
+}
 ```
 
+No prediction.
+No explanation.
+
+This is correct behavior.
+
+---
+
+## System Architecture (High-Level)
+
+```
+Ingestion
+   ↓
+Analytics (aggregation, variability, balance)
+   ↓
+Baseline evaluation
+   ↓
+Optional ML (interpretable, non-authoritative)
+   ↓
+Numeric explanation
+   ↓
+Risk classification
+   ↓
+Weekly intelligence report
+```
+
+Daily processing is **descriptive only** and intentionally non-predictive.
+
+---
+
+## Machine Learning Philosophy
+
+* **Model**: Linear Regression (OLS)
+* **Reason**: Interpretability > complexity
+* **Role of ML**: Assist explanations, never dominate decisions
+* **Authority**: Baselines first, ML second
+* **Failure Mode**: Safe refusal
+
+ML is treated as a **component**, not the identity of the system.
+
+---
+
+## Project Structure
+
+```
 ai-life-assistant/
-├── core/           # Domain models (Activity, DayLog, User)
-├── analytics/      # Aggregations, trends, statistics
-├── insights/       # Summaries & recommendations
-├── ml/             # Features, datasets, models, evaluation
-├── pipelines/      # Orchestration logic
-├── scripts/        # CLI entry points
-├── tests/          # Unit tests
-├── data/            # (ignored) generated data
-├── reports/         # (ignored) generated outputs
-
+├── core/            # Domain entities (Activity, DayLog, User)
+├── analytics/       # Aggregations, statistics, trends
+├── insights/        # Explanations, risk, summaries
+├── ml/              # Interpretable models & evaluation
+├── pipelines/       # End-to-end orchestration
+├── scripts/         # CLI entry points
+├── docs/            # Intelligence contract & risk taxonomy
+├── tests/           # Unit + behavioral tests
 ```
 
-Empty modules are **intentional** and represent planned system boundaries.
+Empty or minimal modules are **intentional** and represent stable system boundaries.
 
 ---
 
-## 🔮 Machine Learning Approach
+## Intelligence Contract
 
-- **Model**: Linear Regression (Ordinary Least Squares)
-- **Why**: Interpretability > complexity
-- **Features**:
-  - Daily activity totals
-  - Category-level minutes
-  - Lag features (previous day, rolling averages)
-- **Target**:
-  - Next day’s total activity time
+The system is governed by an explicit contract:
 
-The model is evaluated using **MAE** and **RMSE**, and predictions are integrated directly into the daily report.
+* [`docs/intelligence_contract_v1.md`](docs/intelligence_contract_v1.md)
+* [`docs/risk_taxonomy_v1.1.md`](docs/risk_taxonomy_v1.1.md)
 
----
+These documents define:
 
-## 🖥️ Example Output
+* scope
+* guarantees
+* refusal conditions
+* non-goals
 
-```
-
-📅 Daily Report — 2026-01-06
-
-Total active time: 3h 15m
-
-By category:
-
-* Leisure: 2h 15m
-* Work: 1h 0m
-
-🧠 Insight:
-Leisure dominated your day, accounting for most of your active time.
-
-💡 Recommendations:
-
-* Consider balancing leisure with lighter productive activities.
-
-🔮 Prediction:
-Estimated total activity for tomorrow: 8.3 hours
-
-````
+Code is considered correct **only if it conforms to the contract**.
 
 ---
 
-## ▶️ How to Run
+## Running the System
 
-### 1. Set up environment
+### 1. Environment setup
+
 ```bash
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-````
+```
 
 ### 2. Generate synthetic data
 
@@ -113,53 +185,62 @@ pip install -r requirements.txt
 python -m scripts.generate_data
 ```
 
-### 3. Run daily report
+### 3. Run weekly intelligence
 
 ```bash
-python -m scripts.run_daily
+python -m scripts.run_weekly_intelligence
 ```
 
----
-
-## 🧪 Tests
-
-```bash
-pytest
-```
+Daily reports are available but **do not perform prediction** by design.
 
 ---
 
-## 🎯 Design Philosophy
+## Testing Philosophy
 
-* **Architecture first** (clear module boundaries)
-* **Data realism over model complexity**
-* **Causal, time-aware ML**
-* **No black boxes**
-* **Production-style project layout**
+Tests verify:
 
----
+* numerical correctness
+* invariants and refusal conditions
+* deterministic risk classification
+* baseline vs model behavior
+* explanation consistency
 
-## 📌 Status
-
-This project is intentionally extensible.
-Planned areas include:
-
-* Correlation analysis
-* Advanced statistics
-* Model regularization
-* Weekly ML predictions
-* API interface
+This is not just unit testing — it is **behavioral testing**.
 
 ---
 
-## 👤 Author
+## Status
+
+**v1.0 — Frozen Intelligence Contract**
+
+The system is considered complete when:
+
+* weekly pipeline runs end-to-end
+* baseline awareness is enforced
+* explanations are additive and testable
+* risk classification is deterministic
+* refusal semantics are honored
+
+Future versions may extend scope, but **v1 behavior is frozen**.
+
+---
+
+## Author
 
 **Kshitij**
-Built as a hands-on exploration of real-world AI system design.
+
+Built as a serious exploration of:
+
+* explainable AI
+* epistemic humility in ML
+* behavioral intelligence system design
 
 ---
 
-## 📜 License
+## License
 
 MIT
 
+---
+
+This README now tells the **truth** about your system — and that’s its greatest strength.
