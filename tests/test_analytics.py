@@ -5,7 +5,7 @@ Tests analytics computations and aggregations.
 from analytics.aggregations import (
     total_duration_per_day,
     daily_category_minutes,
-    total_duration_per_category
+    total_duration_per_category,activity_count_per_category
 )
 from analytics.statistics import (daily_average, activity_variability, category_share, category_balance,dominance_ratio)
 def test_total_duration_per_day():
@@ -163,3 +163,22 @@ def test_dominance_ratio():
 
     assert round(dominance_ratio(balanced), 2) == 0.33
     assert round(dominance_ratio(skewed), 2) == 0.93
+def test_activity_count_per_category():
+    logs = [
+        {
+            "date": "2024-01-01",
+            "activities": [
+                {"category": "Work", "duration_minutes": 60},
+                {"category": "Study", "duration_minutes": 30},
+            ],
+        },
+        {
+            "date": "2024-01-02",
+            "activities": [
+                {"category": "Work", "duration_minutes": 45},
+            ],
+        },
+    ]
+
+    counts = activity_count_per_category(logs)
+    assert counts == {"Work": 2, "Study": 1}

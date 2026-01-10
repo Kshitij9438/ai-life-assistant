@@ -20,6 +20,12 @@ def train_weekly_model(user) -> Tuple[LinearRegressionModel, Dict[str, float]]:
 
     # 1. Build training data
     X_dicts, y = build_weekly_training_data(user)
+    if len(X_dicts) < 2:
+        raise ValueError(
+        "Weekly ML requires multiple samples to be evaluative. "
+        "Current usage is illustrative only."
+    )
+
 
     if not X_dicts:
         raise ValueError("Not enough data to train weekly model.")

@@ -61,14 +61,27 @@ def run_weekly_intelligence(user_id: str) -> dict:
     baseline_mae = mean_absolute_error(y_true_base, y_pred_base)
 
     # --------------------
-    # 4️⃣ Model Training
+    # 4️⃣ Model Training (doctrine-aware)
     # --------------------
-    X, y_true_model = build_weekly_training_data(user)
+    model = None
+    coefficients = {}
+    prediction = previous_week_total
+    model_mae = None
+    ml_used = False
 
-    model, coefficients = train_weekly_model(user)
-    prediction = model.predict(X)[0]
+    try:
+        X, y_true_model = build_weekly_training_data(user)
+        model, coefficients = train_weekly_model(user)
+        prediction = model.predict(X)[0]
+        model_mae = mean_absolute_error(y_true_model, [prediction])
+        ml_used = True
 
-    model_mae = mean_absolute_error(y_true_model, [prediction])
+    except ValueError:
+        # ✅ Correct behavior: baseline-only intelligence
+        prediction = previous_week_total
+        model_mae = None
+        ml_used = False
+
 
     # --------------------
     # 5️⃣ Explanation
@@ -77,7 +90,7 @@ def run_weekly_intelligence(user_id: str) -> dict:
 
     explanation = explain_weekly_prediction(
     features=features,
-    coefficients=coefficients,
+    coefficients=coefficients if ml_used else {},
     baseline_value=previous_week_total,
     previous_week_value=previous_week_total,
     prediction=prediction,
@@ -106,11 +119,15 @@ def run_weekly_intelligence(user_id: str) -> dict:
         "explanation": explanation,
 
         "evaluation": {
-            "baseline_mae": baseline_mae,
-            "model_mae": model_mae,
-            "beats_baseline": model_mae < baseline_mae,
-            "samples_used": len(X),
-        },
+    "baseline_mae": baseline_mae,
+    "model_mae": model_mae,
+    "beats_baseline": (
+        model_mae < baseline_mae if model_mae is not None else False
+    ),
+    "ml_used": ml_used,
+    "samples_used": len(X) if ml_used else 0,
+},
+
 
         "context": {
             "weeks_used": 2,
@@ -121,11 +138,13 @@ def run_weekly_intelligence(user_id: str) -> dict:
         },
 
         "meta": {
-            "model_type": "LinearRegression",
-            "explainability": "additive",
-            "baseline_type": "previous_week",
-            "version": "v1.0",
+    "model_type": "LinearRegression" if ml_used else None,
+    "explainability": "additive",
+    "baseline_type": "previous_week",
+    "ml_status": "active" if ml_used else "refused_insufficient_data",
+    "version": "v1.0",
         },
+
         "risk" : {**risk,
                    "confidence": explanation["confidence_hint"],
         },

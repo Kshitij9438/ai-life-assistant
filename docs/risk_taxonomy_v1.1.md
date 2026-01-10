@@ -14,6 +14,7 @@ It does **not** infer:
 
 It classifies **trajectory risk**, not outcomes.
 
+All thresholds assume raw (non-normalized) feature values as produced by the analytics pipeline.
 ---
 
 ## Core Principle

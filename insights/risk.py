@@ -1,3 +1,12 @@
+# -----------------------------
+# Risk thresholds (v1.1)
+# -----------------------------
+
+DAILY_VARIABILITY_HIGH = 90.0     # minutes (raw scale)
+DOMINANCE_RATIO_HIGH  = 0.65
+CATEGORY_BALANCE_LOW  = 0.35
+
+
 def _get_feature(features: dict, *keys: str, default: float = 0.0) -> float:
     """
     Helper to support multiple feature aliases.
@@ -31,34 +40,47 @@ def classify_weekly_risk(features: dict[str, float]) -> dict:
     dr = _get_feature(features, "dominance_ratio", "dr")
     cb = _get_feature(features, "category_balance", "cb")
 
-    V_HIGH = 0.7 if dv <= 1 else 70   # supports normalized + raw
-    D_HIGH = 0.65
-    B_LOW = 0.35
+    drivers: list[str] = []
 
-    drivers = []
+    # -----------------------------
+    # Variability scale handling
+    # -----------------------------
+    if dv <= 1.0:
+        # normalized variability
+        is_high_variability = dv >= 0.7
+    else:
+        # raw variability (minutes)
+        is_high_variability = dv >= DAILY_VARIABILITY_HIGH
 
-    if dv >= V_HIGH:
+    is_high_dominance = dr >= DOMINANCE_RATIO_HIGH
+    is_low_balance    = cb <= CATEGORY_BALANCE_LOW
+
+    if is_high_variability:
         drivers.append("high_variability")
-    if dr >= D_HIGH:
+    if is_high_dominance:
         drivers.append("high_dominance")
-    if cb <= B_LOW:
+    if is_low_balance:
         drivers.append("low_balance")
 
-    if dv >= V_HIGH and dr >= D_HIGH:
+    # -----------------------------
+    # Risk level resolution (ordered)
+    # -----------------------------
+
+    if is_high_variability and is_high_dominance:
         return {
             "risk_level": "R3",
             "risk_label": "fragile_trajectory",
             "drivers": drivers,
         }
 
-    if dv >= V_HIGH:
+    if is_high_variability:
         return {
             "risk_level": "R2",
             "risk_label": "volatility_risk",
             "drivers": drivers,
         }
 
-    if dr >= D_HIGH or cb <= B_LOW:
+    if is_high_dominance or is_low_balance:
         return {
             "risk_level": "R1",
             "risk_label": "load_concentration_risk",

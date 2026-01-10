@@ -86,4 +86,6 @@ def activity_count_per_category(logs: List[dict]) -> Dict[str, int]:
     for log in logs:
         for activity in log.get("activities", []):
             category = activity["category"]
-            counts[category] = counts
+            counts[category] = counts.get(category, 0) + 1
+
+    return counts

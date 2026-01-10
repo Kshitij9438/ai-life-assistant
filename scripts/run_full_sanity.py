@@ -18,7 +18,6 @@ from ml.train_weekly_model import train_weekly_model
 from ml.train import build_weekly_training_data
 from ml.metrics import mean_absolute_error
 
-
 def run_full_sanity(user_id: str) -> None:
     print("\n==============================")
     print("🧪 FULL SYSTEM SANITY CHECK")
@@ -56,30 +55,34 @@ def run_full_sanity(user_id: str) -> None:
 
     print("🧠 ML Training Data")
     print(f"   Samples: {len(X)}")
-    print(f"   Features per sample: {len(X[0])}\n")
-
-    # 5️⃣ Train model
-    model, coeffs = train_weekly_model(user)
-
-    # Convert dict features → ordered vectors
-    y_pred_model = model.predict(X)
-    model_mae = mean_absolute_error(y_true_model, y_pred_model)
-
-    print("📈 Model Evaluation")
-    print(f"   MAE: {model_mae:.2f}\n")
-
-    # 6️⃣ Coefficient inspection
-    print("🔍 Model Coefficients (by importance)")
-    for k, v in sorted(coeffs.items(), key=lambda x: abs(x[1]), reverse=True):
-        print(f"   {k:25s} → {v:.3f}")
-
-    # 7️⃣ Verdict
-    print("\n==============================")
-    if model_mae < baseline_mae:
-        print("🏆 Model beats baseline ✔")
+    if X:
+        print(f"   Features per sample: {len(X[0])}\n")
     else:
-        print("⚠️ Model does NOT beat baseline (expected early)")
-    print("==============================\n")
+        print("   Features per sample: N/A\n")
+
+    # 5️⃣ Train model (doctrine-aware)
+    try:
+        model, coeffs = train_weekly_model(user)
+        y_pred_model = model.predict(X)
+        model_mae = mean_absolute_error(y_true_model, y_pred_model)
+
+        print("📈 Model Evaluation")
+        print(f"   MAE: {model_mae:.2f}\n")
+
+        print("🔍 Model Coefficients (by importance)")
+        for k, v in sorted(coeffs.items(), key=lambda x: abs(x[1]), reverse=True):
+            print(f"   {k:25s} → {v:.3f}")
+
+        if model_mae < baseline_mae:
+            print("\n🏆 Model beats baseline ✔")
+        else:
+            print("\n⚠️ Model does NOT beat baseline")
+
+    except ValueError as e:
+        print("⚠️ Weekly ML skipped (correct behavior)")
+        print(f"   Reason: {e}")
+        print("   Baseline-only intelligence is active ✔")
+
 
 
 if __name__ == "__main__":

@@ -15,11 +15,12 @@ from pipelines.week_utils import split_into_weeks
 
 def build_weekly_training_data(user) -> Tuple[List[Dict[str, float]], List[float]]:
     """
-    Build supervised learning data from a user's activity history.
+    Build illustrative weekly feature-target pair.
 
-    Each training example represents:
-    - X[i]: Aggregated features from week i
-    - y[i]: Total active minutes in week i+1
+    NOTE:
+    This function currently returns a single (X, y) pair and is
+    intended for explainability and directional reasoning only.
+    It does NOT produce statistically sufficient training data.
     """
 
     if user is None:
