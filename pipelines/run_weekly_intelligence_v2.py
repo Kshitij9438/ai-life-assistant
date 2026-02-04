@@ -15,6 +15,8 @@ from ml.metrics import mean_absolute_error
 from insights.explainations import explain_weekly_prediction
 from insights.risk import classify_weekly_risk
 from insights.risk_trajectory import evaluate_risk_trajectory
+from insights.warning_engine import evaluate_warning
+
 
 
 def run_weekly_intelligence_v2(
@@ -112,16 +114,19 @@ def run_weekly_intelligence_v2(
     # 7️⃣ Risk Trajectory & Warning (v2)
     # --------------------
     if risk_history is None:
-        # No history → silence
-        warning = {
-            "warning_level": "none",
-            "reason": None,
-            "trajectory": [current_risk["risk_level"]],
-            "weeks_observed": 1,
-        }
+        full_history = [current_risk["risk_level"]]
     else:
         full_history = risk_history + [current_risk["risk_level"]]
-        warning = evaluate_risk_trajectory(full_history)
+
+    # 7a️⃣ Interpret trajectory (state machine)
+    trajectory_result = evaluate_risk_trajectory(full_history)
+
+    # 7b️⃣ Communicate trajectory (warning engine)
+    warning = evaluate_warning(
+        risk_history=full_history,
+        weeks_observed=len(full_history),
+        confidence=explanation["confidence_hint"],
+    )
 
     # --------------------
     # 8️⃣ Final Output Contract
