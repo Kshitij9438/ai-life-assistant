@@ -1,4 +1,5 @@
 # AI Life Assistant
+“v2-risk-trajectory is an experimental branch exploring early warning semantics. Not intended for merge into main yet."
 
 A **baseline-aware, explainable behavioral intelligence system** for detecting and forecasting the *structural sustainability* of human activity patterns.
 
@@ -242,4 +243,6 @@ Built as a serious exploration of:
 MIT
 
 ---
+
+
 
