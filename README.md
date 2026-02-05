@@ -1,228 +1,251 @@
-# AI Life Assistant
-“v2-risk-trajectory is an experimental branch exploring early warning semantics. Not intended for merge into main yet."
+# AI Life Assistant  
+### Behavioral Risk Intelligence System
 
-A **baseline-aware, explainable behavioral intelligence system** for detecting and forecasting the *structural sustainability* of human activity patterns.
+This repository implements a **personal behavioral intelligence system** that models **risk as a trajectory over time**, detects **behavioral drift**, and issues **early warnings** using primarily **passive signals**.
 
-This project is **not** a productivity tool, habit tracker, or motivational system.
-It is a **decision-support intelligence engine** designed to reason cautiously about behavior over time.
-
----
-
-## What This System Does (Precisely)
-
-At its core, the AI Life Assistant answers one question:
-
-> **“Given recent behavior, is the current activity trajectory stable, fragile, or at risk — and why?”**
-
-To do this, the system:
-
-* Aggregates daily activity logs into structured weekly signals
-* Evaluates behavior **relative to explicit baselines**
-* Produces **short-horizon forecasts only** (weekly)
-* Explains predictions using **fully numeric, additive explanations**
-* Classifies **structural risk states** deterministically
-* Explicitly **refuses to speak** when signal quality is insufficient
-
-Silence is considered a **correct and intentional output**.
+This project is **not** a productivity tool, habit tracker, chatbot, or motivational system.  
+It is a **longitudinal risk modeling engine** designed to reason cautiously about how human behavior evolves — and when that evolution becomes fragile.
 
 ---
 
-## What This System Explicitly Does *Not* Do
+## The problem this system models
+
+Most personal systems ask:
+
+> “What should the user do?”
+
+This system asks a different, more fundamental question:
+
+> **“Given observed behavior over time, what does the system believe about the stability of the current trajectory — and how is that belief changing?”**
+
+The focus is **not outcomes, intent, or psychology**, but **structural sustainability of behavior**.
+
+---
+
+## Core idea
+
+Human behavior is treated as a **dynamic system under uncertainty**.
+
+Rather than reacting to individual events, the system:
+
+1. **Observes behavioral signals over time**
+2. **Infers latent stability states**
+3. **Tracks risk as a trajectory, not a score**
+4. **Estimates short-horizon drift**
+5. **Emits early warnings only when confidence is sufficient**
+
+Silence and refusal are considered **correct outputs** when evidence is weak.
+
+---
+
+## Key abstractions
+
+### Signals
+
+Signals are any observable behavioral evidence emitted over time, including:
+
+- activity regularity  
+- load concentration  
+- volatility  
+- gaps, delays, and structural imbalance  
+
+Signals are **passive-first** and do not rely on constant user input.
+
+---
+
+### State
+
+A state represents the system’s **current belief** about behavioral stability.
+
+States are:
+
+- inferred (never self-reported)  
+- time-dependent  
+- deterministic given sufficient signal  
+- explicitly bounded by refusal conditions  
+
+---
+
+### Risk trajectory
+
+Risk is **not a snapshot** and **not a score**.
+
+It is a **trajectory**:
+
+- direction matters  
+- acceleration matters  
+- volatility matters  
+
+The system cares more about **where risk is heading** than where it currently is.
+
+---
+
+### Warning semantics
+
+Warnings are emitted only when:
+
+- trajectories cross structural thresholds  
+- drift is consistent across signals  
+- early correction is still possible  
+
+The system prefers **early, low-cost warnings** over late or intrusive intervention.
+
+---
+
+## What this system explicitly does *not* do
 
 This project does **not**:
 
-* optimize productivity
-* prescribe schedules or actions
-* motivate users
-* infer intent, discipline, or effort
-* predict burnout, success, or well-being
-* produce long-horizon forecasts
-* perform daily-level prediction
+- optimize productivity  
+- prescribe actions or schedules  
+- motivate users  
+- infer intent, discipline, or effort  
+- predict success, burnout, or well-being  
+- produce long-horizon forecasts  
+- speak when signal quality is insufficient  
 
-These exclusions are **deliberate design choices**, not missing features.
+These are **intentional design constraints**, not missing features.
 
 ---
 
-## Core Capabilities (v1)
+## System behavior (current scope)
 
-### 🧠 Weekly Behavioral Intelligence
+### Weekly behavioral intelligence
 
-* Computes weekly activity totals and structure
-* Forecasts **next week only**
-* Always compares predictions against a naive baseline
-* Downgrades or suppresses ML output when it adds no value
+- Aggregates daily behavior into weekly signals  
+- Produces **short-horizon (next-week) projections only**  
+- Treats baselines as first-class references  
+- Suppresses ML output when it adds no structural value  
 
-### 📉 Baseline-Aware Evaluation
+---
 
-* Baseline MAE is always computed
-* Model MAE is always computed (when ML is used)
-* The system explicitly reports whether ML beats the baseline
-* If it does not, ML is treated as **non-authoritative**
+### Baseline-first reasoning
 
-### 🧩 Explainable Predictions
+- Baseline error is always computed  
+- Model error is always compared against baseline  
+- ML is treated as **non-authoritative**  
+- If ML does not outperform baseline, it is demoted  
 
-Every prediction includes:
+---
 
-* numeric feature contributions
-* top positive and negative drivers
-* explicit deltas vs baseline and previous week
-* confidence hints tied to structural reliability
+### Explainability
 
-No black-box explanations.
+All projections include:
+
+- numeric feature contributions  
+- deltas vs baseline and prior period  
+- structurally grounded confidence hints  
+
+No black-box explanations.  
 No behavioral judgments.
 
-### ⚠️ Structural Risk Classification
+---
 
-Weekly behavior is classified into deterministic risk states:
+### Risk state classification
 
-* **R0** — Stable trajectory
-* **R1** — Load concentration risk
-* **R2** — Volatility risk
-* **R3** — Fragile trajectory
-* **R4** — Insufficient signal (refusal)
+Behavioral trajectories are classified into deterministic states:
 
-Risk reflects **trajectory sustainability**, not outcomes or psychology.
+- **R0** — Stable trajectory  
+- **R1** — Load concentration risk  
+- **R2** — Volatility risk  
+- **R3** — Fragile trajectory  
+- **R4** — Insufficient signal (explicit refusal)  
 
-### 🛑 Refusal Semantics
+Risk reflects **structural sustainability**, not outcomes or psychology.
 
-If fewer than two full weeks of data exist — or signal quality is poor — the system returns:
+---
+
+### Refusal semantics
+
+When signal quality is insufficient, the system returns:
 
 ```json
 {
   "state": "insufficient_data"
 }
-```
+````
 
 No prediction.
 No explanation.
 
-This is correct behavior.
+This is **correct behavior**.
 
 ---
 
-## System Architecture (High-Level)
+## Architecture (high-level)
 
 ```
-Ingestion
-   ↓
-Analytics (aggregation, variability, balance)
-   ↓
+Behavioral signals
+        ↓
+Aggregation & structure analysis
+        ↓
 Baseline evaluation
-   ↓
-Optional ML (interpretable, non-authoritative)
-   ↓
-Numeric explanation
-   ↓
-Risk classification
-   ↓
-Weekly intelligence report
+        ↓
+Optional interpretable ML
+        ↓
+Trajectory estimation
+        ↓
+Risk state classification
+        ↓
+Warning / refusal
 ```
 
 Daily processing is **descriptive only** and intentionally non-predictive.
 
 ---
 
-## Machine Learning Philosophy
+## Machine learning philosophy
 
-* **Model**: Linear Regression (OLS)
-* **Reason**: Interpretability > complexity
-* **Role of ML**: Assist explanations, never dominate decisions
+* **Model**: Interpretable linear models
+* **Role**: Assist reasoning, never dominate it
 * **Authority**: Baselines first, ML second
-* **Failure Mode**: Safe refusal
+* **Failure mode**: Safe refusal
 
-ML is treated as a **component**, not the identity of the system.
+ML is a **component**, not the identity of the system.
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 ai-life-assistant/
-├── core/            # Domain entities (Activity, DayLog, User)
-├── analytics/       # Aggregations, statistics, trends
-├── insights/        # Explanations, risk, summaries
+├── core/            # Domain entities
+├── analytics/       # Aggregation & structural signals
+├── insights/        # State, trajectory, warnings
 ├── ml/              # Interpretable models & evaluation
-├── pipelines/       # End-to-end orchestration
-├── scripts/         # CLI entry points
-├── docs/            # Intelligence contract & risk taxonomy
-├── tests/           # Unit + behavioral tests
+├── pipelines/       # Longitudinal orchestration
+├── scripts/         # Entry points
+├── docs/            # Intelligence contracts & taxonomies
+├── tests/           # Behavioral & invariant tests
 ```
 
-Empty or minimal modules are **intentional** and represent stable system boundaries.
+Minimal or empty modules represent **stable conceptual boundaries**, not incomplete work.
 
 ---
 
-## Intelligence Contract
+## Intelligence contract
 
-The system is governed by an explicit contract:
+System behavior is governed by explicit contracts:
 
-* [`docs/intelligence_contract_v1.md`](docs/intelligence_contract_v1.md)
-* [`docs/risk_taxonomy_v1.1.md`](docs/risk_taxonomy_v1.1.md)
+* `docs/intelligence_contract_v*.md`
+* `docs/risk_trajectory_state_machine_v*.md`
 
-These documents define:
-
-* scope
-* guarantees
-* refusal conditions
-* non-goals
-
-Code is considered correct **only if it conforms to the contract**.
-
----
-
-## Running the System
-
-### 1. Environment setup
-
-```bash
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 2. Generate synthetic data
-
-```bash
-python -m scripts.generate_data
-```
-
-### 3. Run weekly intelligence
-
-```bash
-python -m scripts.run_weekly_intelligence
-```
-
-Daily reports are available but **do not perform prediction** by design.
-
----
-
-## Testing Philosophy
-
-Tests verify:
-
-* numerical correctness
-* invariants and refusal conditions
-* deterministic risk classification
-* baseline vs model behavior
-* explanation consistency
-
-This is not just unit testing — it is **behavioral testing**.
+Code is considered correct **only if it conforms to these contracts**.
 
 ---
 
 ## Status
 
-**v1.0 — Frozen Intelligence Contract**
+**Canonical branch: `main`**
 
-The system is considered complete when:
+The system is considered valid when:
 
-* weekly pipeline runs end-to-end
-* baseline awareness is enforced
-* explanations are additive and testable
-* risk classification is deterministic
+* trajectories are time-consistent
+* baselines are enforced
+* risk states are deterministic
 * refusal semantics are honored
 
-Future versions may extend scope, but **v1 behavior is frozen**.
+Future versions may expand signal sources, but **the modeling philosophy is stable**.
 
 ---
 
@@ -232,17 +255,13 @@ Future versions may extend scope, but **v1 behavior is frozen**.
 
 Built as a serious exploration of:
 
-* explainable AI
+* behavioral risk modeling
+* longitudinal intelligence systems
 * epistemic humility in ML
-* behavioral intelligence system design
 
 ---
 
 ## License
 
 MIT
-
----
-
-
 
